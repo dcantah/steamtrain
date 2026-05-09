@@ -119,10 +119,17 @@ fn draw_table<B: Backend>(f: &mut Frame<B>, area: Rect, app: &mut App) {
         .fg(Color::Black)
         .add_modifier(Modifier::BOLD);
 
+    // Block borders (top + bottom = 2) + header row (1) = 3 rows of chrome.
+    let table_height = (area.height as usize).saturating_sub(3);
+    app.table_state.ensure_visible(table_height);
+    let offset = app.table_state.offset;
+
     let rows: Vec<Row> = app
         .filtered_apps
         .iter()
         .enumerate()
+        .skip(offset)
+        .take(table_height)
         .map(|(i, a)| {
             let size_str = if a.size_on_disk_manifest > 0 {
                 human_bytes(a.size_on_disk_manifest)
@@ -162,10 +169,6 @@ fn draw_table<B: Backend>(f: &mut Frame<B>, area: Rect, app: &mut App) {
             }
         })
         .collect();
-
-    // Ensure visibility
-    let table_height = area.height.saturating_sub(2) as usize;
-    app.table_state.ensure_visible(table_height);
 
     // Calculate name column width: total width minus fixed columns and spacing
     // Fixed: APP ID(10) + SIZE(12) + PLAYTIME(10) + LAST UPDATED(18) + LAST PLAYED(18) = 68
