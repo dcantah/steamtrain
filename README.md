@@ -69,11 +69,32 @@ cargo build --release
 
 ## Usage
 
+Launch the TUI:
+
 ```bash
 steamtrain
 ```
 
-### Keybindings
+Print disk usage per library (using the size reported in each app's manifest):
+
+```bash
+steamtrain size
+```
+
+Walk each game directory for real on-disk usage instead of trusting the manifest tally (slower, but accurate):
+
+```bash
+steamtrain size --walk
+```
+
+Add `-g` / `--per-game` to also list every game with its individual size, sorted largest-first. Combines with `--walk`:
+
+```bash
+steamtrain size -g
+steamtrain size --walk -g
+```
+
+### TUI Keybindings
 
 | Key | Action |
 |-----|--------|
