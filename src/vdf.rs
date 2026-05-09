@@ -57,8 +57,17 @@ pub struct VdfObject {
 }
 
 impl VdfObject {
+    /// Valve's KeyValues format treats keys as case-insensitive, but real-world
+    /// VDF files (e.g. localconfig.vdf) vary the casing per-user (`valve` vs `Valve`).
+    fn find_ci(&self, key: &str) -> Option<&VdfValue> {
+        self.raw
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case(key))
+            .map(|(_, v)| v)
+    }
+
     pub fn require_object(&self, key: &str) -> Result<VdfObject, VdfError> {
-        match self.raw.get(key) {
+        match self.find_ci(key) {
             Some(VdfValue::Object(m)) => Ok(VdfObject { raw: m.clone() }),
             Some(_) => Err(VdfError::TypeMismatch(key.to_string())),
             None => Err(VdfError::MissingKey(key.to_string())),
@@ -66,7 +75,7 @@ impl VdfObject {
     }
 
     pub fn require_string(&self, key: &str) -> Result<String, VdfError> {
-        match self.raw.get(key) {
+        match self.find_ci(key) {
             Some(VdfValue::String(s)) => Ok(s.clone()),
             Some(_) => Err(VdfError::TypeMismatch(key.to_string())),
             None => Err(VdfError::MissingKey(key.to_string())),
